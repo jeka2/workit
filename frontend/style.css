@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,200;1,500;1,800&display=swap');
+
+* {
+    font-family: 'Fira Sans', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.text-primary {
+    font-weight: 800;
+    margin-left: 5px;
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Header */
+
+.nav {
+    transition: all .4s linear;
+    height: 70%;
+}
+
+.nav.blurred {
+    transition: all .4s linear;
+    opacity: 0.5;
+}
+
+.nav:hover {
+    cursor: pointer;
+}
+
+.nav:before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.nav:hover:before {
+    visibility: visible;
+    width: 100%;
+}
+
+.water-nav:hover:before {
+    background-color: blue;
+}
+
+.nutrition-nav:hover:before {
+    background-color: rgb(124, 51, 51);
+}
+
+.exercise-nav:hover:before {
+    background-color: rgb(39, 99, 39);
+}
+
+.logo {
+    position: relative;
+    bottom: 2px;
+}
+
+.section-navigation {
+    width: 500px;
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+}
+
+.section-navigation>.nav {
+    position: relative;
+    top: 20px;
+}
+
+.nav-text {
+    position: relative;
+    font-size: 20px;
+    font-weight: 800;
+    margin-left: 5px;
+    bottom: 3px;
+}
+
+i {
+    display: inline-block;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.user-info {
+    position: relative;
+    top: 3px;
+    width: 150px;
+}
+
+.hero {
+    height: 100vh;
+    background: url('images/hero/hero.jpg') no-repeat center center/cover;
+}
