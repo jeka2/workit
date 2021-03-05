@@ -41,6 +41,7 @@ sectionNavs.forEach(section => {
 // }
 
 function blurNavbar(e) {
+    console.log('hi')
     const section = e.target.closest('.nav');
     for (let i = 0; i < allSections.length; i++) {
         if (allSections[i] !== section) {

@@ -2,6 +2,7 @@
 
 * {
     font-family: 'Fira Sans', sans-serif;
+    box-sizing: border-box;
 }
 
 body {
@@ -14,7 +15,14 @@ body {
     margin-left: 5px;
 }
 
+#navbar {
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+}
+
 .navbar-container {
+    left: 30px;
     max-width: 1200px;
     margin: auto;
     display: flex;
@@ -54,7 +62,7 @@ body {
 }
 
 .water-nav:hover:before {
-    background-color: blue;
+    background-color: rgb(15, 52, 187);
 }
 
 .nutrition-nav:hover:before {
@@ -103,6 +111,66 @@ i {
 }
 
 .hero {
+    position: relative;
     height: 100vh;
     background: url('images/hero/hero.jpg') no-repeat center center/cover;
+}
+
+#sections-navigation-links {
+    position: absolute;
+    display: flex;
+    left: 50%;
+    top: 50%;
+    width: 80%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+#sections-navigation-links>a {
+    width: 33%;
+    padding: 20px;
+    margin: 0 20px;
+    text-decoration: none;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+    font-weight: 800;
+    border-radius: 10px;
+    border: 2px solid white;
+    transition: all .4s linear;
+}
+
+#sections-navigation-links>a:hover {
+    transition: all .4s linear;
+}
+
+.nutrition-link:hover {
+    background: rgba(124, 51, 51, .6);
+}
+
+.exercise-link:hover {
+    background: rgba(39, 99, 39, .6);
+}
+
+.water-link:hover {
+    background: rgba(15, 52, 187, .6);
+}
+
+/* Nutrition */
+#nutrition {
+    height: 1000px;
+    background-color: green;
+    opacity: .1;
+}
+/* Exercise */
+#exercise {
+    height: 1000px;
+    background-color: red;
+    opacity: .1;
+}
+/* Water */
+#water {
+    height: 1000px;
+    background-color: blue;
+    opacity: .1;
 }
