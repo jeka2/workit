@@ -8,11 +8,16 @@
 body {
     margin: 0;
     padding: 0;
+    text-align: center;
 }
 
 a {
     text-decoration: none;
     color: black;
+}
+
+.hidden {
+    display: none;
 }
 
 .text-primary {
@@ -154,6 +159,30 @@ i {
 
 #sections-navigation-links .water-link:hover {
     background: rgba(15, 52, 187, .6);
+}
+
+/* Overview */
+
+#overview {
+    height: 1000px;
+    background-color: yellow;
+    opacity: .1;
+}
+
+#signin {
+    padding: 20px 0;
+}
+
+.signin-button {
+    border: none;
+    width: 100px;
+    height: 50px;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.signin-button:hover {
+    cursor: pointer;
 }
 
 /* Nutrition */
