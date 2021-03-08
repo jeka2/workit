@@ -10,6 +10,11 @@ const nutritionLink = document.querySelector('.nutrition-link');
 const exerciseLink = document.querySelector('.exercise-link');
 const waterLink = document.querySelector('.water-link');
 
+sectionNavs.forEach(section => {
+    section.addEventListener('mouseover', blurNavbar);
+    section.addEventListener('mouseout', unblurNavbar);
+});
+
 
 function blurNavbar(e) {
     const section = e.target.closest('.nav');
