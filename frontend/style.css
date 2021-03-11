@@ -161,6 +161,17 @@ i {
     background: rgba(15, 52, 187, .6);
 }
 
+.welcome-container {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.welcome-message {
+
+}
+
 /* Overview */
 
 #overview {
