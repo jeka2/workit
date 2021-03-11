@@ -165,12 +165,10 @@ i {
 
 #overview {
     height: 1000px;
-    background-color: yellow;
-    opacity: .1;
 }
 
-#signin {
-    padding: 20px 0;
+.overview-header {
+    font-size: 28px;
 }
 
 .signin-button {
@@ -188,8 +186,7 @@ i {
 /* Nutrition */
 #nutrition {
     height: 1000px;
-    background-color: green;
-    opacity: .1;
+
 }
 /* Exercise */
 #exercise {

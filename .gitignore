@@ -27,5 +27,8 @@
 !/storage/.keep
 .byebug_history
 
+node_modules
+
 # Ignore master key for decrypting credentials and more.
 /backend/config/master.key
+.env
