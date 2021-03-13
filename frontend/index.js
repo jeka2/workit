@@ -10,7 +10,12 @@ const nutritionLink = document.querySelector('.nutrition-link');
 const exerciseLink = document.querySelector('.exercise-link');
 const waterLink = document.querySelector('.water-link');
 
+const loginModal = document.getElementById('login-modal');
+const formContents = document.querySelector('.form-contents');
 
+const userIcon = document.querySelector('.user-info');
+
+document.addEventListener('DOMContentLoaded', init);
 
 sectionNavs.forEach(section => {
     section.addEventListener('mouseover', blurNavbar);
@@ -120,3 +125,19 @@ trend.addEventListener('click', function (evt) {
     myLineChart.data.labels.pop();
     myLineChart.update();
 });
+
+// Login
+
+userIcon.addEventListener('click', function (e) {
+    userIcon.classList.remove('hidden');
+    userIcon.insertAdjacentElement('afterEnd', div)
+
+});
+
+document.addEventListener('click', function (e) {
+    const modalShown = !loginModal.classList.contains('hidden');
+    if (modalShown && !e.target.closest('.form-contents')) {
+        loginModal.classList.add('hidden');
+    }
+});
+
