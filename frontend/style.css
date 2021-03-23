@@ -204,7 +204,22 @@ i {
 /* Nutrition */
 #nutrition {
     height: 1000px;
+}
 
+#nutrition .search {
+    max-width: 800px;
+    width: 50%;
+    height: 40px;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding-left: 20px;
+    font-size: 20px;
+    outline: 0;
+}
+
+#nutrition select {
+    height: 40px;
+    font-size: 20px;
 }
 /* Exercise */
 #exercise {

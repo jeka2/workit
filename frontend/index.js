@@ -120,8 +120,6 @@ ctx.addEventListener('click', function (e) {
 
 trend.addEventListener('click', function (evt) {
     var firstPoint = myLineChart.getElementAtEvent(evt)[0];
-    console.log(firstPoint);
-    console.log(myLineChart.data.labels)
     myLineChart.data.labels.pop();
     myLineChart.update();
 });
@@ -131,13 +129,38 @@ trend.addEventListener('click', function (evt) {
 userIcon.addEventListener('click', function (e) {
     userIcon.classList.remove('hidden');
     userIcon.insertAdjacentElement('afterEnd', div)
-
 });
 
 document.addEventListener('click', function (e) {
-    const modalShown = !loginModal.classList.contains('hidden');
+    const modalShown = loginModal && !loginModal.classList.contains('hidden');
     if (modalShown && !e.target.closest('.form-contents')) {
         loginModal.classList.add('hidden');
     }
 });
 
+function init() {
+    return new Food().todaysItems
+}
+
+class Food {
+    get todaysItems() {
+        const today = new Date();
+        const todaysDay = today.getDate();
+        const todaysMonth = today.getMonth() + 1;
+        const todaysYear = today.getFullYear();
+
+        this.getItemsFromDay(todaysDay, todaysMonth, todaysYear);
+    }
+
+    getItemsFromDay(day, month, year) {
+        const url = new URL('http://localhost:3000/foods')
+        const params = {
+            day: day,
+            month: month,
+            year: year,
+        }
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+        fetch(url).then(data => data.json())
+            .then(res => console.log(res))
+    }
+}
