@@ -225,6 +225,7 @@ const populateSearchbar = function (query) {
 
     function appendResultsToSearchbar(res) {
         let ul = document.createElement('ul');
+        ul.classList.add('search-results');
         let li;
         let thumbnail;
         let name;

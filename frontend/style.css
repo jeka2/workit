@@ -223,9 +223,44 @@ i {
 }
 
 .search-thumb {
-    height: 30px;
-    width: 30px;
+    height: 40px;
+    width: 40px;
 }
+
+.search-results {
+    border: 1px solid black;
+    list-style-type: none;
+    width: 50%;
+    max-width: 880px;
+    margin: auto;
+    padding: 0px;
+}
+
+.search-results:last-child {
+    border-bottom: none;
+}
+
+.search-result{
+    display: flex;
+    border-bottom: 1px solid black;
+    padding: 0 40px;
+}
+
+.search-result:hover {
+    background-color: whitesmoke;
+    cursor: pointer;
+}
+
+
+.search-result>p {
+   font-size: 20px;
+   margin-left: 30px;
+}
+
+.search-result>img {
+    padding-top: 10px;
+}
+
 /* Exercise */
 #exercise {
     height: 1000px;
