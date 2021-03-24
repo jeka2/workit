@@ -206,7 +206,7 @@ i {
     height: 1000px;
 }
 
-#nutrition .search {
+#nutrition .food-searchbar {
     max-width: 800px;
     width: 50%;
     height: 40px;
@@ -220,6 +220,11 @@ i {
 #nutrition select {
     height: 40px;
     font-size: 20px;
+}
+
+.search-thumb {
+    height: 30px;
+    width: 30px;
 }
 /* Exercise */
 #exercise {

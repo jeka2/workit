@@ -15,6 +15,8 @@ const formContents = document.querySelector('.form-contents');
 
 const userIcon = document.querySelector('.user-info');
 
+const foodBar = document.querySelector('.food-searchbar');
+
 document.addEventListener('DOMContentLoaded', init);
 
 sectionNavs.forEach(section => {
@@ -139,11 +141,19 @@ document.addEventListener('click', function (e) {
 });
 
 function init() {
-    return new Food().todaysItems
+
 }
 
 class Food {
-    get todaysItems() {
+    constructor(name, calories, protein, carbs, fat, id) {
+
+    }
+
+    populateInfo() {
+
+    }
+
+    static get todaysItems() {
         const today = new Date();
         const todaysDay = today.getDate();
         const todaysMonth = today.getMonth() + 1;
@@ -152,8 +162,21 @@ class Food {
         this.getItemsFromDay(todaysDay, todaysMonth, todaysYear);
     }
 
-    getItemsFromDay(day, month, year) {
-        const url = new URL('http://localhost:3000/foods')
+    static searchResults = []; // Search results from searchbar
+
+    static set results(items) {
+        this.searchResults = [];
+        items.forEach(item => {
+            this.searchResults.push(item);
+        })
+    }
+
+    static appendItemsToBar() {
+        foodBar.appendChild()
+    }
+
+    static getItemsFromDay(day, month, year) {
+        const url = new URL('http://localhost:3000/foods');
         const params = {
             day: day,
             month: month,
@@ -163,4 +186,74 @@ class Food {
         fetch(url).then(data => data.json())
             .then(res => console.log(res))
     }
+
+    static getSearchbarResults(query) {
+        const url = new URL('http://localhost:3000/foods/search');
+        const params = { query: query }
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+        return fetch(url).then(data => data.json())
+    }
 }
+
+// Nutrition Section
+
+let timeout;
+
+const populateSearchbar = function (query) {
+    Food.getSearchbarResults(query)
+        .then(res => addToSearchResults(res))
+        .then(res => appendResultsToSearchbar(res))
+
+    function addToSearchResults(res) {
+        Food.searchResults = [];
+        const resultQuantity = 5;
+        const commonItems = res.results.common; // Common as opposed to branded
+        const results = commonItems.slice(0, resultQuantity);
+
+        const resultPromise = new Promise(function (res, rej) {
+            results.forEach(record => {
+                let searchBarInfo = {
+                    name: record.food_name,
+                    thumbnail: record.photo.thumb
+                }
+                Food.searchResults.push(searchBarInfo);
+            })
+            res(Food.searchResults);
+        })
+        return resultPromise;
+    }
+
+    function appendResultsToSearchbar(res) {
+        let ul = document.createElement('ul');
+        let li;
+        let thumbnail;
+        let name;
+        res.forEach((el, index) => {
+            li = document.createElement('li');
+            li.classList.add('search-result', `result-${index + 1}`);
+
+            thumbnail = document.createElement('img');
+            thumbnail.classList.add('search-thumb');
+            thumbnail.src = el.thumbnail;
+
+            name = document.createElement('p');
+            name.innerText = el.name;
+
+            li.appendChild(thumbnail);
+            li.appendChild(name);
+
+            ul.appendChild(li);
+        });
+
+        foodBar.insertAdjacentElement('afterEnd', ul);
+
+    }
+}
+
+foodBar.addEventListener('keyup', function (e) {
+    e.preventDefault();
+    const query = e.target.value;
+    if (timeout) clearTimeout(timeout);
+
+    timeout = setTimeout(populateSearchbar, 1000, query);
+});
