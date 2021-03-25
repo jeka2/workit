@@ -17,6 +17,8 @@ const userIcon = document.querySelector('.user-info');
 
 const foodBar = document.querySelector('.food-searchbar');
 
+let searchBarResults = document.querySelector('.search-results');
+
 document.addEventListener('DOMContentLoaded', init);
 
 sectionNavs.forEach(section => {
@@ -145,12 +147,21 @@ function init() {
 }
 
 class Food {
-    constructor(name, calories, protein, carbs, fat, id) {
-
+    constructor(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit) {
+        this.name = name;
+        this.cal = cal;
+        this.pro = pro;
+        this.chol = chol;
+        this.sod = sod;
+        this.sug = sug;
+        this.carb = carb;
+        this.fat = fat;
+        this.serv_qty = serv_qty;
+        this.serv_unit = serv_unit;
     }
 
-    populateInfo() {
-
+    displayInfo() {
+        console.log(this);
     }
 
     static get todaysItems() {
@@ -163,7 +174,8 @@ class Food {
     }
 
     static searchResults = []; // Search results from searchbar
-    static fullResultInfo = [];
+    static currentlyViewed = null; // Currently selected item
+    static todaysNutrition = [];
 
     static set results(items) {
         this.searchResults = [];
@@ -198,10 +210,18 @@ class Food {
     static getFullNutrition(name) {
         const formattedName = name.split(' ').join('_');
         const url = new URL(`http://localhost:3000/foods/${formattedName}`);
-        fetch(url)
-            .then(data => data.json())
-            .then(res => console.log(res))
-            .catch(err => console.log(err.message));
+        return fetch(url).then(data => data.json())
+    }
+
+    static createInstanceFromApi(object) {
+        const nutritionalData = object.results.foods[0];
+        const [name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit] = [nutritionalData['food_name'], nutritionalData['nf_calories'], nutritionalData['nf_protein'], nutritionalData['nf_cholesterol'],
+        nutritionalData['nf_sodium'], nutritionalData['nf_sugars'], nutritionalData['nf_total_carbohydrate'], nutritionalData['nf_total_fat'],
+        nutritionalData['serving_qty'], nutritionalData['serving_unit']];
+
+        const newItem = new Food(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit)
+
+        return new Promise((res, rej) => res(newItem))
     }
 }
 
@@ -237,15 +257,15 @@ const populateResultInfo = function (query) {
     }
 
     function appendResultsToSearchbar(res) {
-        let ul = document.querySelector('.search-results');
-        ul.innerHTML = "";
+        searchBarResults.innerHTML = "";
         let li;
         let thumbnail;
         let name;
-        const names = [];
+        console.log(Food.searchResults)
         res.forEach((el, index) => {
             li = document.createElement('li');
             li.classList.add('search-result', `result-${index + 1}`);
+            li.setAttribute('data-element', index);
 
             thumbnail = document.createElement('img');
             thumbnail.classList.add('search-thumb');
@@ -254,21 +274,11 @@ const populateResultInfo = function (query) {
             name = document.createElement('p');
             name.innerText = el.name;
 
-            names.push(el.name); // For return promise
-
             li.appendChild(thumbnail);
             li.appendChild(name);
 
-            ul.appendChild(li);
+            searchBarResults.appendChild(li);
         });
-
-        foodBar.insertAdjacentElement('afterEnd', ul);
-
-        const namesPromise = new Promise(function (res, rej) {
-            res(names);
-        })
-
-        return namesPromise;
     }
 
 }
@@ -280,3 +290,11 @@ foodBar.addEventListener('keyup', function (e) {
 
     timeout = setTimeout(populateResultInfo, 1000, query);
 });
+
+searchBarResults.addEventListener('click', e => {
+    const elementNumber = e.target.closest('.search-result').getAttribute('data-element');
+    const queryName = Food.searchResults[elementNumber].name;
+    Food.getFullNutrition(queryName)
+        .then(res => Food.createInstanceFromApi(res))
+        .then(foodInstance.displayInfo())
+})
