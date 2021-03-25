@@ -10,7 +10,9 @@ class FoodsController < ApplicationController
     end
 
     def show
-        binding.pry
+        name = params[:id].split('_').join(' ')
+        results = full_item_info(name)
+        render json: { results: results }
     end
 
     def destroy

@@ -228,16 +228,20 @@ i {
 }
 
 .search-results {
-    border: 1px solid black;
+    position: absolute;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
     list-style-type: none;
     width: 50%;
     max-width: 880px;
     margin: auto;
     padding: 0px;
+    left: 50%;
+    transform: translate(-50%);
 }
 
-.search-results:last-child {
-    border-bottom: none;
+.search-results .result-1 {
+    border-top: 1px solid black;
 }
 
 .search-result{
@@ -251,7 +255,6 @@ i {
     cursor: pointer;
 }
 
-
 .search-result>p {
    font-size: 20px;
    margin-left: 30px;
@@ -259,6 +262,12 @@ i {
 
 .search-result>img {
     padding-top: 10px;
+}
+
+.food-info-container {
+    border: 1px solid black;
+    height: 80%;
+    display: flex;
 }
 
 /* Exercise */

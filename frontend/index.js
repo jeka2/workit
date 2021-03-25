@@ -163,6 +163,7 @@ class Food {
     }
 
     static searchResults = []; // Search results from searchbar
+    static fullResultInfo = [];
 
     static set results(items) {
         this.searchResults = [];
@@ -193,21 +194,33 @@ class Food {
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
         return fetch(url).then(data => data.json())
     }
+
+    static getFullNutrition(name) {
+        const formattedName = name.split(' ').join('_');
+        const url = new URL(`http://localhost:3000/foods/${formattedName}`);
+        fetch(url)
+            .then(data => data.json())
+            .then(res => console.log(res))
+            .catch(err => console.log(err.message));
+    }
 }
 
 // Nutrition Section
 
 let timeout;
 
-const populateSearchbar = function (query) {
+// On searchbar entry, autofil by query and fetch full nutritional info
+const populateResultInfo = function (query) {
     Food.getSearchbarResults(query)
-        .then(res => addToSearchResults(res))
-        .then(res => appendResultsToSearchbar(res))
+        .then(foodInfo => addToSearchResults(foodInfo))
+        .then(results => appendResultsToSearchbar(results))
+        .catch(err => console.log(err)); // Do a flash that says something went wrong
 
     function addToSearchResults(res) {
         Food.searchResults = [];
-        const resultQuantity = 5;
         const commonItems = res.results.common; // Common as opposed to branded
+        const maxrResultQuantity = 5;
+        const resultQuantity = commonItems.length > maxrResultQuantity ? maxrResultQuantity : commonItems.length;
         const results = commonItems.slice(0, resultQuantity);
 
         const resultPromise = new Promise(function (res, rej) {
@@ -224,11 +237,12 @@ const populateSearchbar = function (query) {
     }
 
     function appendResultsToSearchbar(res) {
-        let ul = document.createElement('ul');
-        ul.classList.add('search-results');
+        let ul = document.querySelector('.search-results');
+        ul.innerHTML = "";
         let li;
         let thumbnail;
         let name;
+        const names = [];
         res.forEach((el, index) => {
             li = document.createElement('li');
             li.classList.add('search-result', `result-${index + 1}`);
@@ -240,6 +254,8 @@ const populateSearchbar = function (query) {
             name = document.createElement('p');
             name.innerText = el.name;
 
+            names.push(el.name); // For return promise
+
             li.appendChild(thumbnail);
             li.appendChild(name);
 
@@ -248,7 +264,13 @@ const populateSearchbar = function (query) {
 
         foodBar.insertAdjacentElement('afterEnd', ul);
 
+        const namesPromise = new Promise(function (res, rej) {
+            res(names);
+        })
+
+        return namesPromise;
     }
+
 }
 
 foodBar.addEventListener('keyup', function (e) {
@@ -256,5 +278,5 @@ foodBar.addEventListener('keyup', function (e) {
     const query = e.target.value;
     if (timeout) clearTimeout(timeout);
 
-    timeout = setTimeout(populateSearchbar, 1000, query);
+    timeout = setTimeout(populateResultInfo, 1000, query);
 });
