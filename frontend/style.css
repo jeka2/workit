@@ -248,6 +248,7 @@ i {
     display: flex;
     border-bottom: 1px solid black;
     padding: 0 40px;
+    background-color: rgb(218, 196, 196);
 }
 
 .search-result:hover {
@@ -265,9 +266,38 @@ i {
 }
 
 .food-info-container {
+    max-width: 1500px;
     border: 1px solid black;
     height: 80%;
     display: flex;
+    margin: auto;
+}
+
+.food-image-container {
+    float: left;
+    width: 300px;
+    height: 300px;
+}
+
+.food-image-container>img {
+    width: inherit;
+    height: inherit;
+}
+
+.nutrition-info-container {
+    text-align: left;
+    margin-left: 10px;
+}
+
+.result-container {
+    margin-left: 100px;
+    margin-top: 30px;
+    flex: 3;
+    display: flex;
+}
+
+.daily-info {
+    flex: 2;
 }
 
 /* Exercise */

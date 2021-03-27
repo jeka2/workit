@@ -18,6 +18,7 @@ const userIcon = document.querySelector('.user-info');
 const foodBar = document.querySelector('.food-searchbar');
 
 let searchBarResults = document.querySelector('.search-results');
+let foodResultContainer = document.querySelector('.result-container');
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -140,6 +141,7 @@ document.addEventListener('click', function (e) {
     if (modalShown && !e.target.closest('.form-contents')) {
         loginModal.classList.add('hidden');
     }
+    if (searchBarResults.innerHTML !== '') searchBarResults.innerHTML = '';
 });
 
 function init() {
@@ -147,7 +149,7 @@ function init() {
 }
 
 class Food {
-    constructor(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit) {
+    constructor(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit, photo, thumb) {
         this.name = name;
         this.cal = cal;
         this.pro = pro;
@@ -158,10 +160,61 @@ class Food {
         this.fat = fat;
         this.serv_qty = serv_qty;
         this.serv_unit = serv_unit;
+        this.photo = photo;
+        this.thumb = thumb;
     }
 
     displayInfo() {
-        console.log(this);
+        const imageContainer = document.querySelector('.food-image-container');
+        const nutritionInfoContainer = document.querySelector('.nutrition-info-container');
+        const foodImage = document.createElement('img');
+        foodImage.src = this.photo;
+        foodImage.alt = this.name + ' photo';
+
+        imageContainer.innerHTML = "";
+        imageContainer.appendChild(foodImage);
+
+        this.buildDomInfo(nutritionInfoContainer)
+    }
+
+    buildDomInfo(container) {
+        container.innerHTML = "";
+        const nameNode = document.createElement('h3');
+        console.log(this)
+        let name = this.name.split(' ').map(word => {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
+        nameNode.innerText = name;
+
+        const calorieNode = document.createElement('h4');
+        calorieNode.innerText = 'Calories: ' + this.cal;
+
+        const carbNode = document.createElement('h4');
+        carbNode.innerText = 'Carbs: ' + this.carb;
+
+        const fatNode = document.createElement('h4');
+        fatNode.innerText = 'Fat: ' + this.fat;
+
+        const proteinNode = document.createElement('h4');
+        proteinNode.innerText = 'Protein: ' + this.pro;
+
+        const sodiumNode = document.createElement('h4');
+        sodiumNode.innerText = 'Sodium: ' + this.sod;
+
+        const sugarNode = document.createElement('h4');
+        sugarNode.innerText = 'Sugars: ' + this.sug;
+
+        const servingsNode = document.createElement('h4');
+        servingsNode.innerText = `Serving Size: ${this.serv_qty} ${this.serv_unit}`;
+
+        container.appendChild(nameNode);
+        container.appendChild(calorieNode);
+        container.appendChild(carbNode);
+        container.appendChild(fatNode);
+        container.appendChild(proteinNode);
+        container.appendChild(sodiumNode);
+        container.appendChild(sugarNode);
+        container.appendChild(servingsNode);
     }
 
     static get todaysItems() {
@@ -215,11 +268,13 @@ class Food {
 
     static createInstanceFromApi(object) {
         const nutritionalData = object.results.foods[0];
-        const [name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit] = [nutritionalData['food_name'], nutritionalData['nf_calories'], nutritionalData['nf_protein'], nutritionalData['nf_cholesterol'],
-        nutritionalData['nf_sodium'], nutritionalData['nf_sugars'], nutritionalData['nf_total_carbohydrate'], nutritionalData['nf_total_fat'],
-        nutritionalData['serving_qty'], nutritionalData['serving_unit']];
+        console.log(nutritionalData);
+        const [name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit, photo, thumb] = [nutritionalData['food_name'], nutritionalData['nf_calories'], nutritionalData['nf_protein'], nutritionalData['nf_cholesterol'], nutritionalData['nf_sodium'], nutritionalData['nf_sugars'], nutritionalData['nf_total_carbohydrate'], nutritionalData['nf_total_fat'],
+        nutritionalData['serving_qty'], nutritionalData['serving_unit'], nutritionalData['photo']['highres'], nutritionalData['photo']['thumb']];
 
-        const newItem = new Food(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit)
+        const newItem = new Food(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit, photo, thumb);
+
+        Food.currentlyViewed = newItem;
 
         return new Promise((res, rej) => res(newItem))
     }
@@ -239,8 +294,8 @@ const populateResultInfo = function (query) {
     function addToSearchResults(res) {
         Food.searchResults = [];
         const commonItems = res.results.common; // Common as opposed to branded
-        const maxrResultQuantity = 5;
-        const resultQuantity = commonItems.length > maxrResultQuantity ? maxrResultQuantity : commonItems.length;
+        const maxResultQuantity = 5;
+        const resultQuantity = commonItems.length > maxResultQuantity ? maxResultQuantity : commonItems.length;
         const results = commonItems.slice(0, resultQuantity);
 
         const resultPromise = new Promise(function (res, rej) {
@@ -261,7 +316,6 @@ const populateResultInfo = function (query) {
         let li;
         let thumbnail;
         let name;
-        console.log(Food.searchResults)
         res.forEach((el, index) => {
             li = document.createElement('li');
             li.classList.add('search-result', `result-${index + 1}`);
@@ -296,5 +350,5 @@ searchBarResults.addEventListener('click', e => {
     const queryName = Food.searchResults[elementNumber].name;
     Food.getFullNutrition(queryName)
         .then(res => Food.createInstanceFromApi(res))
-        .then(foodInstance.displayInfo())
+        .then(foodInstance => foodInstance.displayInfo())
 })
