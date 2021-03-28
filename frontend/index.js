@@ -19,8 +19,10 @@ const foodBar = document.querySelector('.food-searchbar');
 
 let searchBarResults = document.querySelector('.search-results');
 let foodResultContainer = document.querySelector('.result-container');
+let nutritionDate = document.getElementById('nutrition-date');
 
 document.addEventListener('DOMContentLoaded', init);
+
 
 sectionNavs.forEach(section => {
     section.addEventListener('mouseover', blurNavbar);
@@ -145,7 +147,8 @@ document.addEventListener('click', function (e) {
 });
 
 function init() {
-
+    let observer = new IntersectionObserver(Food.loadInitialContent);
+    observer.observe(nutritionSection);
 }
 
 class Food {
@@ -217,6 +220,12 @@ class Food {
             .then(data => console.log(data));
     }
 
+    static searchResults = []; // Search results from searchbar
+    static currentlyViewed = null; // Currently selected item
+    static todaysNutrition = [];
+    static selectedDate = new Date();
+    static contentLoaded = false;
+
     static get todaysItems() {
         const today = new Date();
         const todaysDay = today.getDate();
@@ -225,10 +234,6 @@ class Food {
 
         this.getItemsFromDay(todaysDay, todaysMonth, todaysYear);
     }
-
-    static searchResults = []; // Search results from searchbar
-    static currentlyViewed = null; // Currently selected item
-    static todaysNutrition = [];
 
     static set results(items) {
         this.searchResults = [];
@@ -277,6 +282,14 @@ class Food {
         Food.currentlyViewed = newItem;
 
         return new Promise((res, rej) => res(newItem))
+    }
+
+    static loadInitialContent(e) {
+        console.log(e[0].isIntersecting);
+    }
+
+    static setDate(date) {
+        nutritionDate.valueAsDate = new Date();
     }
 }
 

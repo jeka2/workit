@@ -34,6 +34,6 @@ private
     end
 
     def food_params
-        params.require()
+        params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb)
     end
 end
