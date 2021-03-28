@@ -151,12 +151,12 @@ function init() {
 class Food {
     constructor(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit, photo, thumb) {
         this.name = name;
-        this.cal = cal;
-        this.pro = pro;
-        this.chol = chol;
-        this.sod = sod;
-        this.sug = sug;
-        this.carb = carb;
+        this.calories = cal;
+        this.protein = pro;
+        this.cholesterol = chol;
+        this.sodium = sod;
+        this.sugar = sug;
+        this.carbs = carb;
         this.fat = fat;
         this.serv_qty = serv_qty;
         this.serv_unit = serv_unit;
@@ -179,42 +179,42 @@ class Food {
 
     buildDomInfo(container) {
         container.innerHTML = "";
-        const nameNode = document.createElement('h3');
-        console.log(this)
-        let name = this.name.split(' ').map(word => {
-            return word.charAt(0).toUpperCase() + word.slice(1);
-        }).join(' ');
-        nameNode.innerText = name;
 
-        const calorieNode = document.createElement('h4');
-        calorieNode.innerText = 'Calories: ' + this.cal;
+        let node;
+        let nodeText;
 
-        const carbNode = document.createElement('h4');
-        carbNode.innerText = 'Carbs: ' + this.carb;
+        Object.getOwnPropertyNames(this).forEach(key => {
+            if (key === 'photo' || key === 'thumb') return
+            else if (key === 'serv_qty') nodeText = `Serving Quantity: ${this[key]}`;
+            else if (key === 'serv_unit') nodeText = `Serving Unit: ${this[key]}`;
+            else if (key === 'name') nodeText = this[key].split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            else nodeText = key.charAt(0).toUpperCase() + key.slice(1) + `: ${this[key]}`;
 
-        const fatNode = document.createElement('h4');
-        fatNode.innerText = 'Fat: ' + this.fat;
+            node = document.createElement(key === 'name' ? 'h3' : 'h4');
+            node.innerText = nodeText;
 
-        const proteinNode = document.createElement('h4');
-        proteinNode.innerText = 'Protein: ' + this.pro;
+            container.appendChild(node);
+        });
 
-        const sodiumNode = document.createElement('h4');
-        sodiumNode.innerText = 'Sodium: ' + this.sod;
+        const addButton = document.createElement('button');
+        addButton.classList.add('add-to-list');
+        addButton.innerText = "Add To List"
+        addButton.addEventListener('click', this.addToNutrition.bind(this));
 
-        const sugarNode = document.createElement('h4');
-        sugarNode.innerText = 'Sugars: ' + this.sug;
+        container.appendChild(addButton);
+    }
 
-        const servingsNode = document.createElement('h4');
-        servingsNode.innerText = `Serving Size: ${this.serv_qty} ${this.serv_unit}`;
-
-        container.appendChild(nameNode);
-        container.appendChild(calorieNode);
-        container.appendChild(carbNode);
-        container.appendChild(fatNode);
-        container.appendChild(proteinNode);
-        container.appendChild(sodiumNode);
-        container.appendChild(sugarNode);
-        container.appendChild(servingsNode);
+    addToNutrition(e) {
+        const url = new URL('http://localhost:3000/foods');
+        const data = {};
+        Object.getOwnPropertyNames(this).forEach(key => {
+            data[key] = this[key];
+        });
+        console.log(data);
+        url.searchParams.append("data", JSON.stringify({ 'foods': data }));
+        fetch(url, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => console.log(data));
     }
 
     static get todaysItems() {
@@ -286,6 +286,7 @@ let timeout;
 
 // On searchbar entry, autofil by query and fetch full nutritional info
 const populateResultInfo = function (query) {
+    if (query.replace(/\s+/g, '') == '') return
     Food.getSearchbarResults(query)
         .then(foodInfo => addToSearchResults(foodInfo))
         .then(results => appendResultsToSearchbar(results))

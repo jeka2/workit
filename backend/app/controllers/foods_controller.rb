@@ -6,7 +6,7 @@ class FoodsController < ApplicationController
     end
 
     def create 
-
+        binding.pry
     end
 
     def show
@@ -31,5 +31,9 @@ private
 
     def searchbar_info(query:, size:)
         HTTParty.get("https://trackapi.nutritionix.com/v2/search/instant?query=#{query}", headers: {"x-app-id": ENV['NUTRITIONIX_ID'], "x-app-key": ENV['NUTRITIONIX_KEY'], "x-remote-user-id": '0'})
+    end
+
+    def food_params
+        params.require()
     end
 end

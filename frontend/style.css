@@ -300,6 +300,11 @@ i {
     flex: 2;
 }
 
+.nutrition-info-container>button {
+    height: 40px;
+    width: 65px;
+}
+
 /* Exercise */
 #exercise {
     height: 1000px;
