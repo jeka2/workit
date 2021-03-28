@@ -10,29 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_14_224339) do
+ActiveRecord::Schema.define(version: 2021_03_28_163403) do
 
   create_table "days", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "weight"
-    t.integer "calories"
-    t.integer "protein"
-    t.integer "carbs"
-    t.integer "fat"
-    t.integer "water"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["user_id"], name: "index_days_on_user_id"
   end
 
   create_table "foods", force: :cascade do |t|
     t.integer "day_id", null: false
     t.string "name"
-    t.decimal "servings"
+    t.decimal "serv_qty"
+    t.string "serv_unit"
     t.decimal "protein"
     t.decimal "fat"
+    t.decimal "sodium"
     t.decimal "carbs"
     t.decimal "calories"
+    t.decimal "cholesterol"
+    t.decimal "sugar"
+    t.string "photo"
+    t.string "thumb"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["day_id"], name: "index_foods_on_day_id"
@@ -46,6 +44,5 @@ ActiveRecord::Schema.define(version: 2021_03_14_224339) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  add_foreign_key "days", "users"
   add_foreign_key "foods", "days"
 end
