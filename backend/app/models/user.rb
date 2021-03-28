@@ -1,5 +1,6 @@
 class User < ApplicationRecord
     has_secure_password
+    has_many :days
     validates :username, length: { minimum: 5, maximum: 30 },
         uniqueness: true
     
