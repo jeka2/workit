@@ -5,8 +5,19 @@ class FoodsController < ApplicationController
         # render json: { user: User.where(created_at: day.midnight..day.end_of_day)}
     end
 
-    def create 
-        binding.pry
+    def create   
+        day_param = Date.parse(JSON.parse(params[:data])['day'])
+        
+        day = Day.where(created_at: day_param.midnight..day_param.end_of_day).first
+        food = Food.new(food_params)
+        if day 
+            food.day = day
+        else
+            day = Day.create(user: User.first)
+            food.day = day
+        end
+
+        food.save
     end
 
     def show
@@ -34,6 +45,7 @@ private
     end
 
     def food_params
-        params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb)
+        json_params = ActionController::Parameters.new(JSON.parse(params[:data]))
+        json_params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb, :day)
     end
 end

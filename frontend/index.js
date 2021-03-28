@@ -208,13 +208,14 @@ class Food {
     }
 
     addToNutrition(e) {
+        e.preventDefault();
         const url = new URL('http://localhost:3000/foods');
         const data = {};
         Object.getOwnPropertyNames(this).forEach(key => {
             data[key] = this[key];
         });
-        console.log(data);
-        url.searchParams.append("data", JSON.stringify({ 'foods': data }));
+
+        url.searchParams.append("data", JSON.stringify({ 'foods': data, 'day': this.constructor.selectedDate }));
         fetch(url, { method: 'POST' })
             .then(res => res.json())
             .then(data => console.log(data));
@@ -285,7 +286,10 @@ class Food {
     }
 
     static loadInitialContent(e) {
-        console.log(e[0].isIntersecting);
+        if (e[0].isIntersecting && !this.contentLoaded) {
+            this.contentLoaded = true;
+
+        }
     }
 
     static setDate(date) {
