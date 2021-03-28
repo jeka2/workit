@@ -1,8 +1,8 @@
 class FoodsController < ApplicationController
     require 'httparty'
     def index
-        # day = Time.parse("#{params[:year]}-#{params[:month]}-#{params[:day]}")
-        # render json: { user: User.where(created_at: day.midnight..day.end_of_day)}
+        day = Time.parse("#{params[:year]}-#{params[:month]}-#{params[:day]}")
+        render json: { foods: Food.where(created_at: day.midnight..day.end_of_day)}
     end
 
     def create   

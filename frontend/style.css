@@ -16,6 +16,10 @@ a {
     color: black;
 }
 
+ul {
+    list-style-type: none;
+}
+
 .hidden {
     display: none !important;
 }
@@ -303,6 +307,55 @@ i {
 .nutrition-info-container>button {
     height: 40px;
     width: 65px;
+}
+
+.foods-of-day-container {
+    border: 1px solid black;
+    border-radius: 4px;
+    margin-top: 40px;
+    height: 80%;
+    overflow: auto;
+    margin-right: 20px;
+}
+
+.day-items {
+    padding: 0;
+    margin: 2px 10px;
+}
+
+.day-item {
+    display: relative;
+    text-align: left;
+    height: 120px;
+    border-bottom: 1px solid black;
+}
+
+.macro-section {
+    display: flex;
+    font-size: 13px;
+    justify-content: space-evenly;
+}
+
+.main-section {
+    position: relative;
+    display: flex;
+}
+
+.main-section h4 {
+    font-size: 20px;
+    flex: 2;
+    text-align: center;
+}
+
+.main-section>img {
+    position: absolute;
+    top: 10px;
+    height: 60px;
+}
+
+.main-section>button {
+    height: 20px;
+    outline: none;
 }
 
 /* Exercise */

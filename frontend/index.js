@@ -21,6 +21,8 @@ let searchBarResults = document.querySelector('.search-results');
 let foodResultContainer = document.querySelector('.result-container');
 let nutritionDate = document.getElementById('nutrition-date');
 
+const foodsOfDay = document.querySelector('.foods-of-day-container');
+
 document.addEventListener('DOMContentLoaded', init);
 
 
@@ -147,7 +149,7 @@ document.addEventListener('click', function (e) {
 });
 
 function init() {
-    let observer = new IntersectionObserver(Food.loadInitialContent);
+    let observer = new IntersectionObserver(Food.loadInitialContent.bind(Food));
     observer.observe(nutritionSection);
 }
 
@@ -227,24 +229,13 @@ class Food {
     static selectedDate = new Date();
     static contentLoaded = false;
 
-    static get todaysItems() {
+    static getTodaysItems() {
         const today = new Date();
         const todaysDay = today.getDate();
         const todaysMonth = today.getMonth() + 1;
         const todaysYear = today.getFullYear();
 
-        this.getItemsFromDay(todaysDay, todaysMonth, todaysYear);
-    }
-
-    static set results(items) {
-        this.searchResults = [];
-        items.forEach(item => {
-            this.searchResults.push(item);
-        })
-    }
-
-    static appendItemsToBar() {
-        foodBar.appendChild()
+        return this.getItemsFromDay(todaysDay, todaysMonth, todaysYear);
     }
 
     static getItemsFromDay(day, month, year) {
@@ -255,8 +246,66 @@ class Food {
             year: year,
         }
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-        fetch(url).then(data => data.json())
-            .then(res => console.log(res))
+        return fetch(url).then(data => data.json());
+    }
+
+    static appendItemsFromDay(items) {
+        this.todaysNutrition = [];
+
+        const foodsUl = document.createElement('ul');
+        foodsUl.classList.add('day-items');
+
+        let newInstance;
+        let name;
+        let li;
+        let thumb;
+        let macroSection;
+        let picked;
+        let p;
+        let mainSection;
+        let removeButton;
+
+        items.foods.forEach((food, index) => {
+            newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carb, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb);
+            this.todaysNutrition.push(newInstance);
+
+            li = document.createElement('li');
+            li.classList.add('day-item', `day-item-${index + 1}`);
+            li.setAttribute('data-element', index);
+
+            name = document.createElement('h4');
+            name.innerText = food.name;
+
+            thumb = document.createElement('img');
+            thumb.src = food.thumb;
+
+            macroSection = document.createElement('div');
+            macroSection.classList.add('macro-section');
+
+            picked = (({ calories, protein, carbs, fat }) => ({ calories, protein, carbs, fat }))(food);
+
+            Object.keys(picked).forEach(function (key) {
+                p = document.createElement('p');
+                p.innerText = key.charAt(0).toUpperCase() + key.slice(1) + `: ${picked[key]}`;
+
+                macroSection.appendChild(p);
+            })
+
+            mainSection = document.createElement('div');
+            mainSection.classList.add('main-section');
+            removeButton = document.createElement('button');
+            removeButton.innerText = 'X';
+
+            mainSection.appendChild(thumb);
+            mainSection.appendChild(name);
+            mainSection.appendChild(removeButton);
+
+            li.appendChild(mainSection);
+            li.appendChild(macroSection);
+
+            foodsUl.appendChild(li);
+        });
+        foodsOfDay.appendChild(foodsUl);
     }
 
     static getSearchbarResults(query) {
@@ -288,7 +337,8 @@ class Food {
     static loadInitialContent(e) {
         if (e[0].isIntersecting && !this.contentLoaded) {
             this.contentLoaded = true;
-
+            this.getTodaysItems()
+                .then(items => this.appendItemsFromDay(items))
         }
     }
 
