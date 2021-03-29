@@ -170,6 +170,7 @@ class Food {
     }
 
     displayInfo() {
+        console.log(this)
         const imageContainer = document.querySelector('.food-image-container');
         const nutritionInfoContainer = document.querySelector('.nutrition-info-container');
         const foodImage = document.createElement('img');
@@ -223,6 +224,10 @@ class Food {
             .then(data => console.log(data));
     }
 
+    removeFromNutrition() {
+        console.log(this.closest('.day-item'))
+    }
+
     static searchResults = []; // Search results from searchbar
     static currentlyViewed = null; // Currently selected item
     static todaysNutrition = [];
@@ -266,12 +271,14 @@ class Food {
         let removeButton;
 
         items.foods.forEach((food, index) => {
-            newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carb, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb);
+            console.log(food)
+            newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb);
             this.todaysNutrition.push(newInstance);
 
             li = document.createElement('li');
             li.classList.add('day-item', `day-item-${index + 1}`);
             li.setAttribute('data-element', index);
+            li.addEventListener('click', newInstance.displayInfo.bind(newInstance));
 
             name = document.createElement('h4');
             name.innerText = food.name;
@@ -293,8 +300,10 @@ class Food {
 
             mainSection = document.createElement('div');
             mainSection.classList.add('main-section');
+
             removeButton = document.createElement('button');
             removeButton.innerText = 'X';
+            removeButton.addEventListener('click', newInstance.removeFromNutrition);
 
             mainSection.appendChild(thumb);
             mainSection.appendChild(name);
@@ -306,6 +315,8 @@ class Food {
             foodsUl.appendChild(li);
         });
         foodsOfDay.appendChild(foodsUl);
+
+        return new Promise(res => res(this.todaysNutrition[0]));
     }
 
     static getSearchbarResults(query) {
@@ -339,11 +350,14 @@ class Food {
             this.contentLoaded = true;
             this.getTodaysItems()
                 .then(items => this.appendItemsFromDay(items))
+                .then(firstItem => firstItem.displayInfo())
+            this.setDate(new Date());
         }
     }
 
     static setDate(date) {
-        nutritionDate.valueAsDate = new Date();
+
+        nutritionDate.valueAsDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
     }
 }
 

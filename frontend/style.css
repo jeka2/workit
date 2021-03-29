@@ -330,6 +330,11 @@ i {
     border-bottom: 1px solid black;
 }
 
+.day-item:hover {
+    background-color: rgb(218, 196, 196);
+    cursor: pointer;
+}
+
 .macro-section {
     display: flex;
     font-size: 13px;
@@ -350,6 +355,7 @@ i {
 .main-section>img {
     position: absolute;
     top: 10px;
+    left: 3px;
     height: 60px;
 }
 
