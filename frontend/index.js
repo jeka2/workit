@@ -256,7 +256,6 @@ class Food {
 
     static appendItemsFromDay(items) {
         this.todaysNutrition = [];
-
         const foodsUl = document.createElement('ul');
         foodsUl.classList.add('day-items');
 
@@ -271,7 +270,6 @@ class Food {
         let removeButton;
 
         items.foods.forEach((food, index) => {
-            console.log(food)
             newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb);
             this.todaysNutrition.push(newInstance);
 
@@ -316,6 +314,8 @@ class Food {
         });
         foodsOfDay.appendChild(foodsUl);
 
+        console.log(this.todaysNutrition)
+
         return new Promise(res => res(this.todaysNutrition[0]));
     }
 
@@ -356,7 +356,6 @@ class Food {
     }
 
     static setDate(date) {
-
         nutritionDate.valueAsDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
     }
 }
