@@ -2,28 +2,38 @@ class FoodsController < ApplicationController
     require 'httparty'
     def index
         day = Time.parse("#{params[:year]}-#{params[:month]}-#{params[:day]}")
+
         render json: { foods: Food.where(created_at: day.midnight..day.end_of_day)}
     end
 
     def create   
-        day_param = Date.parse(JSON.parse(params[:data])['day'])
-        
-        day = Day.where(created_at: day_param.midnight..day_param.end_of_day).first
+        day = day_param
+        binding.pry
         food = Food.new(food_params)
-        if day 
-            food.day = day
-        else
-            day = Day.create(user: User.first)
-            food.day = day
-        end
 
-        food.save
+        food.day = day
+
+        if food.save
+            render json: { message: "#{food.name} has been added!", type: 'success' }
+        else
+            render json: { message: "Something went wrong!", type: 'error' }
+        end
     end
 
     def show
         name = params[:id].split('_').join(' ')
         results = full_item_info(name)
         render json: { results: results }
+    end
+
+    def update 
+        food = Food.find(params[:id])
+
+        if food.update(food_params)
+            render json: { foods: food }
+        else
+            render json: { message: 'Something went wrong' }
+        end
     end
 
     def destroy
@@ -46,6 +56,15 @@ private
 
     def food_params
         json_params = ActionController::Parameters.new(JSON.parse(params[:data]))
-        json_params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb, :day)
+        json_params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb, :id)
     end
+
+    def day_param
+        day_param = Date.parse(JSON.parse(params[:data])['day'])
+        
+        day = Day.where(created_at: day_param.midnight..day_param.end_of_day).first
+        day = Day.create(user: User.first) unless day
+        day
+    end
+
 end

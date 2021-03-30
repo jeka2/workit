@@ -22,6 +22,8 @@ let foodResultContainer = document.querySelector('.result-container');
 let nutritionDate = document.getElementById('nutrition-date');
 
 const foodsOfDay = document.querySelector('.foods-of-day-container');
+let daysItemsUl = document.querySelector('.day-items');
+
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -154,7 +156,7 @@ function init() {
 }
 
 class Food {
-    constructor(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit, photo, thumb) {
+    constructor(name, cal, pro, chol, sod, sug, carb, fat, serv_qty, serv_unit, photo, thumb, id) {
         this.name = name;
         this.calories = cal;
         this.protein = pro;
@@ -167,10 +169,11 @@ class Food {
         this.serv_unit = serv_unit;
         this.photo = photo;
         this.thumb = thumb;
+        this.id = id;
     }
 
+
     displayInfo() {
-        console.log(this)
         const imageContainer = document.querySelector('.food-image-container');
         const nutritionInfoContainer = document.querySelector('.nutrition-info-container');
         const foodImage = document.createElement('img');
@@ -190,7 +193,7 @@ class Food {
         let nodeText;
 
         Object.getOwnPropertyNames(this).forEach(key => {
-            if (key === 'photo' || key === 'thumb') return
+            if (key === 'photo' || key === 'thumb' || key === 'id') return
             else if (key === 'serv_qty') nodeText = `Serving Quantity: ${this[key]}`;
             else if (key === 'serv_unit') nodeText = `Serving Unit: ${this[key]}`;
             else if (key === 'name') nodeText = this[key].split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -212,20 +215,87 @@ class Food {
 
     addToNutrition(e) {
         e.preventDefault();
-        const url = new URL('http://localhost:3000/foods');
         const data = {};
-        Object.getOwnPropertyNames(this).forEach(key => {
-            data[key] = this[key];
-        });
 
-        url.searchParams.append("data", JSON.stringify({ 'foods': data, 'day': this.constructor.selectedDate }));
-        fetch(url, { method: 'POST' })
+        console.log(this.constructor.todaysNutrition);
+        console.log(this);
+
+        const isDuplicate = Utilities.checkDuplicate(this.constructor.todaysNutrition, this, 'id');
+        let method;
+        let methodName = null; // Name of the method invoked based on whether 'PATCH' or 'POST' is used
+        let idParam = "";
+        if (isDuplicate) {
+            method = 'PATCH';
+            idParam = `${this.id}`;
+        }
+        else {
+            method = 'POST';
+        }
+
+        const url = new URL(`http://localhost:3000/foods/${idParam}`);
+
+        url.searchParams.append("data", JSON.stringify({ 'foods': this, 'day': this.constructor.selectedDate }));
+        fetch(url, { method })
             .then(res => res.json())
-            .then(data => console.log(data));
+            .then(data => this.constructor.updateItemsUI(data, method))
     }
 
     removeFromNutrition() {
         console.log(this.closest('.day-item'))
+    }
+
+    addToDaysStackUI(index) {
+        let name;
+        let li;
+        let thumb;
+        let macroSection;
+        let picked;
+        let p;
+        let mainSection;
+        let removeButton;
+
+        li = document.createElement('li');
+        li.classList.add('day-item', `day-item-${index + 1}`);
+        li.setAttribute('data-element', index);
+        li.addEventListener('click', this.displayInfo.bind(this));
+
+        name = document.createElement('h4');
+        name.innerText = this.name;
+
+        thumb = document.createElement('img');
+        thumb.src = this.thumb;
+
+        macroSection = document.createElement('div');
+        macroSection.classList.add('macro-section');
+
+        picked = (({ calories, protein, carbs, fat }) => ({ calories, protein, carbs, fat }))(this);
+
+        Object.keys(picked).forEach(function (key) {
+            p = document.createElement('p');
+            p.innerText = key.charAt(0).toUpperCase() + key.slice(1) + `: ${picked[key]}`;
+
+            macroSection.appendChild(p);
+        })
+
+        mainSection = document.createElement('div');
+        mainSection.classList.add('main-section');
+
+        removeButton = document.createElement('button');
+        removeButton.innerText = 'X';
+        removeButton.addEventListener('click', this.removeFromNutrition);
+
+        mainSection.appendChild(thumb);
+        mainSection.appendChild(name);
+        mainSection.appendChild(removeButton);
+
+        li.appendChild(mainSection);
+        li.appendChild(macroSection);
+
+        daysItemsUl.appendChild(li);
+    }
+
+    updateDaysItemUI() {
+
     }
 
     static searchResults = []; // Search results from searchbar
@@ -233,6 +303,20 @@ class Food {
     static todaysNutrition = [];
     static selectedDate = new Date();
     static contentLoaded = false;
+
+    static updateItemsUI(data, method) {
+        if (method.toLowerCase() === 'post') {
+            const newestFood = this.coerceToFoodObject(data);
+            newestFood.addToDaysStackUI();
+        }
+        else if (method.toLowerCase() === 'patch') {
+
+        }
+    }
+
+    static coerceToFoodObject(food) {
+        return new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb, food.id)
+    }
 
     static getTodaysItems() {
         const today = new Date();
@@ -254,70 +338,25 @@ class Food {
         return fetch(url).then(data => data.json());
     }
 
-    static appendItemsFromDay(items) {
+    static createDayInstances(items) {
         this.todaysNutrition = [];
-        const foodsUl = document.createElement('ul');
-        foodsUl.classList.add('day-items');
-
         let newInstance;
-        let name;
-        let li;
-        let thumb;
-        let macroSection;
-        let picked;
-        let p;
-        let mainSection;
-        let removeButton;
 
-        items.foods.forEach((food, index) => {
-            newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb);
+        items.forEach(food => {
+            newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb, food.id);
+
             this.todaysNutrition.push(newInstance);
-
-            li = document.createElement('li');
-            li.classList.add('day-item', `day-item-${index + 1}`);
-            li.setAttribute('data-element', index);
-            li.addEventListener('click', newInstance.displayInfo.bind(newInstance));
-
-            name = document.createElement('h4');
-            name.innerText = food.name;
-
-            thumb = document.createElement('img');
-            thumb.src = food.thumb;
-
-            macroSection = document.createElement('div');
-            macroSection.classList.add('macro-section');
-
-            picked = (({ calories, protein, carbs, fat }) => ({ calories, protein, carbs, fat }))(food);
-
-            Object.keys(picked).forEach(function (key) {
-                p = document.createElement('p');
-                p.innerText = key.charAt(0).toUpperCase() + key.slice(1) + `: ${picked[key]}`;
-
-                macroSection.appendChild(p);
-            })
-
-            mainSection = document.createElement('div');
-            mainSection.classList.add('main-section');
-
-            removeButton = document.createElement('button');
-            removeButton.innerText = 'X';
-            removeButton.addEventListener('click', newInstance.removeFromNutrition);
-
-            mainSection.appendChild(thumb);
-            mainSection.appendChild(name);
-            mainSection.appendChild(removeButton);
-
-            li.appendChild(mainSection);
-            li.appendChild(macroSection);
-
-            foodsUl.appendChild(li);
         });
-        foodsOfDay.appendChild(foodsUl);
 
-        console.log(this.todaysNutrition)
-
-        return new Promise(res => res(this.todaysNutrition[0]));
+        return new Promise(res => res(this.todaysNutrition));
     }
+
+    static appendItemsFromDay(foods) {
+        foods.slice().reverse().forEach((food, index) => { food.addToDaysStackUI(index); });
+
+        return new Promise(res => res(this.todaysNutrition[this.todaysNutrition.length - 1]));
+    }
+
 
     static getSearchbarResults(query) {
         const url = new URL('http://localhost:3000/foods/search');
@@ -349,14 +388,29 @@ class Food {
         if (e[0].isIntersecting && !this.contentLoaded) {
             this.contentLoaded = true;
             this.getTodaysItems()
-                .then(items => this.appendItemsFromDay(items))
-                .then(firstItem => firstItem.displayInfo())
+                .then(items => this.createDayInstances(items.foods))
+                .then(daysFoods => this.appendItemsFromDay(daysFoods))
+                .then(lastItem => lastItem.displayInfo())
             this.setDate(new Date());
         }
     }
 
     static setDate(date) {
         nutritionDate.valueAsDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
+    }
+}
+
+class Utilities {
+    static displayFlash(message, type) {
+        console.log()
+    }
+
+    static checkDuplicate(objects, object, category) {
+        let duplicate = false;
+        objects.forEach(o => {
+            if (o[category] === object[category]) { duplicate = true; }
+        })
+        return duplicate;
     }
 }
 
