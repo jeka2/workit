@@ -34,15 +34,25 @@ class FoodsController < ApplicationController
     def update 
         food = Food.find(params[:id])
 
-        if food.update(food_params)
-            render json: { foods: food }
+        if food && food.update(food_params)
+            render json: { message: "#{food.name} Updated Successfully", type: 'success' }
         else
-            render json: { message: 'Something went wrong' }
+            render json: { message: "#{food.name} Could Not Be Updated", type: 'error' }
         end
     end
 
     def destroy
-
+        food = Food.find(params[:id])
+        if food 
+            food_name = food.name
+            if food.delete
+                render json: { message: "#{food_name} succesfully removed", type: 'success' } 
+            else
+                render json: { message: "#{food_name} could not be deleted", type: 'error' }
+            end
+        else
+            render json: { message: "Something was wrong with your request", type: 'error' }
+        end
     end
 
     def searchbar
@@ -60,6 +70,7 @@ private
     end
 
     def food_params
+        binding.pry
         json_params = ActionController::Parameters.new(JSON.parse(params[:data]))
         json_params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb, :id)
     end

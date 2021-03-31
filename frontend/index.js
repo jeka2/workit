@@ -218,36 +218,37 @@ class Food {
 
     addToNutrition(e) {
         e.preventDefault();
-        const data = {};
-
-        console.log(this.constructor.todaysNutrition);
-        console.log(this);
 
         const isDuplicate = Utilities.checkDuplicate(this.constructor.todaysNutrition, this, 'id');
         let method;
-        let methodName = null; // Name of the method invoked based on whether 'PATCH' or 'POST' is used
-        let idParam = "";
-        if (isDuplicate) {
-            method = 'PATCH';
-            idParam = this.id;
-        }
-        else {
-            method = 'POST';
-        }
+        if (isDuplicate) method = 'PATCH';
+        else method = 'POST';
 
-        const url = new URL(`http://localhost:3000/foods/${idParam}`);
-
-        url.searchParams.append("data", JSON.stringify({ 'foods': this, 'day': this.constructor.selectedDate }));
-        fetch(url, { method })
-            .then(res => res.json())
-            .then(data => this.constructor.updateItemsUI(data, method))
+        this.makePostApiRequest(method)
     }
 
     removeFromNutrition() {
-        const num = this.closest('.day-item').getAttribute('data-element');
-        console.log(Food.todaysNutrition.splice([Food.todaysNutrition.length - num - 1]), 1);
-        console.log(Food.todaysNutrition)
+        const position = this.closest('.day-item').getAttribute('data-element');
+        const foodToRemove = Food.todaysNutrition.splice([Food.todaysNutrition.length - position - 1], 1)[0];
+        console.log(foodToRemove)
+        foodToRemove.makePostApiRequest('DELETE');
+    }
 
+    makePostApiRequest(method) {
+        const idParam = method.toLowerCase() === 'post' ? '' : this.id;
+        const url = new URL(`http://localhost:3000/foods/${idParam}`);
+
+        const options = {};
+
+        if (method.toLowerCase() !== 'delete') {
+            options['day'] = this.constructor.selectedDate;
+            options['foods'] = this;
+            url.searchParams.append("data", JSON.stringify(options));
+        }
+        fetch(url, { method })
+            .then(res => res.json())
+            .then(res => Utilities.displayFlash(res.message, res.type))
+            .then(data => this.constructor.updateItemsUI(data, method))
     }
 
     addToDaysStackUI(index) {
@@ -290,7 +291,10 @@ class Food {
         removeButton = document.createElement('button');
         removeButton.innerText = 'X';
         removeButton.classList.add('remove-button');
-        removeButton.addEventListener('click', this.removeFromNutrition, 'hi');
+
+        console.log(this)
+
+        removeButton.addEventListener('click', this.removeFromNutrition);
 
         mainSection.appendChild(thumb);
         mainSection.appendChild(name);
@@ -312,17 +316,9 @@ class Food {
     static selectedDate = new Date();
     static contentLoaded = false;
 
-    static updateItemsUI(data, method) {
-        if (method.toLowerCase() === 'post') {
-            const newestFood = this.coerceToFoodObject(data);
-            newestFood.addToDaysStackUI();
-        }
-        else if (method.toLowerCase() === 'patch') {
-
-        }
-        else if (method.toLowerCase() === 'delete') {
-
-        }
+    static updateItemsUI(data) {
+        console.log(data)
+        // reset data attributes on the elements
     }
 
     static coerceToFoodObject(food) {
@@ -421,7 +417,7 @@ class Food {
 
 class Utilities {
     static displayFlash(message, type) {
-        console.log()
+
     }
 
     static checkDuplicate(objects, object, category) {
