@@ -175,7 +175,9 @@ class Food {
     }
 
 
-    displayInfo() {
+    displayInfo(e) {
+        console.log(this.constructor.todaysNutrition)
+        if (e?.target.classList.contains('remove-button')) return;
         const imageContainer = document.querySelector('.food-image-container');
         const nutritionInfoContainer = document.querySelector('.nutrition-info-container');
         const foodImage = document.createElement('img');
@@ -190,7 +192,6 @@ class Food {
 
     buildDomInfo(container) {
         container.innerHTML = "";
-        console.log(this)
         let node;
         let nodeText;
 
@@ -228,7 +229,7 @@ class Food {
         let idParam = "";
         if (isDuplicate) {
             method = 'PATCH';
-            idParam = `${this.id}`;
+            idParam = this.id;
         }
         else {
             method = 'POST';
@@ -243,7 +244,10 @@ class Food {
     }
 
     removeFromNutrition() {
-        console.log(this.closest('.day-item'))
+        const num = this.closest('.day-item').getAttribute('data-element');
+        console.log(Food.todaysNutrition.splice([Food.todaysNutrition.length - num - 1]), 1);
+        console.log(Food.todaysNutrition)
+
     }
 
     addToDaysStackUI(index) {
@@ -259,7 +263,8 @@ class Food {
         li = document.createElement('li');
         li.classList.add('day-item', `day-item-${index + 1}`);
         li.setAttribute('data-element', index);
-        li.addEventListener('click', this.displayInfo.bind(this));
+
+        li.addEventListener('click', this.displayInfo.bind(this), false);
 
         name = document.createElement('h4');
         name.innerText = this.name;
@@ -284,7 +289,8 @@ class Food {
 
         removeButton = document.createElement('button');
         removeButton.innerText = 'X';
-        removeButton.addEventListener('click', this.removeFromNutrition);
+        removeButton.classList.add('remove-button');
+        removeButton.addEventListener('click', this.removeFromNutrition, 'hi');
 
         mainSection.appendChild(thumb);
         mainSection.appendChild(name);
@@ -314,22 +320,19 @@ class Food {
         else if (method.toLowerCase() === 'patch') {
 
         }
+        else if (method.toLowerCase() === 'delete') {
+
+        }
     }
 
     static coerceToFoodObject(food) {
         return new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb, food.id)
     }
 
-    static getTodaysItems() {
-        return this.getItemsFromDay();
-    }
-
-    static getItemsFromDay(date = new Date()) {
+    static getItemsFromDay(date) {
         date = Utilities.getBeginningOfDay(new Date(date));
-        console.log(date)
         const url = new URL('http://localhost:3000/foods');
         const [day, month, year] = [date.getDate(), date.getMonth() + 1, date.getFullYear()];
-        console.log(day, month, year)
         const params = {
             day: day,
             month: month,
@@ -355,6 +358,7 @@ class Food {
     }
 
     static appendItemsFromDay(foods) {
+        daysItemsUl.innerHTML = "";
         foods.slice().reverse().forEach((food, index) => { food.addToDaysStackUI(index); });
         return new Promise(res => res(this.todaysNutrition[this.todaysNutrition.length - 1]));
     }
@@ -389,19 +393,12 @@ class Food {
     static loadInitialContent(e) {
         if (e[0].isIntersecting && !this.contentLoaded) {
             this.contentLoaded = true;
-            this.getTodaysItems()
-                .then(items => this.createDayInstances(items.foods))
-                .then(daysFoods => this.appendItemsFromDay(daysFoods))
-                .then(lastItem => lastItem.displayInfo())
-                .catch(err => {
-                    nutritionMessage.classList.remove('hidden');
-                    nutritionMessage.innerText = err.message;
-                })
+            this.populateUIOfDay(new Date());
             this.setDate(new Date());
         }
     }
 
-    static populateUIOfDay(day = null) {
+    static populateUIOfDay(day) {
         this.getItemsFromDay(day)
             .then(items => this.createDayInstances(items.foods))
             .then(daysFoods => this.appendItemsFromDay(daysFoods))
