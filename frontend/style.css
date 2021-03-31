@@ -490,3 +490,7 @@ i {
     cursor: pointer;
     background-color: rgb(67, 158, 67);
 }
+
+.flash {
+    background-color: green;
+}

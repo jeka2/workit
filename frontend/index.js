@@ -248,7 +248,8 @@ class Food {
         fetch(url, { method })
             .then(res => res.json())
             .then(res => Utilities.displayFlash(res.message, res.type))
-            .then(data => this.constructor.updateItemsUI(data, method))
+            .then(status => this.constructor.populateUIOfDay(this.constructor.selectedDate))
+            .catch(err => console.log(err))
     }
 
     addToDaysStackUI(index) {
@@ -415,9 +416,24 @@ class Food {
     }
 }
 
+const flash = document.querySelector('.flash');
+
 class Utilities {
     static displayFlash(message, type) {
+        flash.classList.remove('hidden');
+        flash.innerText = message;
 
+        setTimeout(this.hideFlash, 3000);
+
+        return new Promise((res, rej) => {
+            if (type === 'success') res(true)
+            else rej(new Error(`${message}`));
+        })
+    }
+
+    static hideFlash() {
+        flash.innerText = "";
+        flash.classList.add('hidden');
     }
 
     static checkDuplicate(objects, object, category) {
@@ -444,7 +460,7 @@ const populateResultInfo = function (query) {
     Food.getSearchbarResults(query)
         .then(foodInfo => addToSearchResults(foodInfo))
         .then(results => appendResultsToSearchbar(results))
-        .catch(err => console.log(err)); // Do a flash that says something went wrong
+        .catch(err => Utilities.displayFlash(err.message, 'error'));
 
     function addToSearchResults(res) {
         Food.searchResults = [];
