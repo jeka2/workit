@@ -3,12 +3,17 @@ class FoodsController < ApplicationController
     def index
         day = Time.parse("#{params[:year]}-#{params[:month]}-#{params[:day]}")
 
-        render json: { foods: Food.where(created_at: day.midnight..day.end_of_day)}
+        foods = Food.where(created_at: day.midnight..day.end_of_day)
+
+        if foods.empty?
+            render json: { foods: foods }
+        else    
+            render json: { foods: Food.where(created_at: day.midnight..day.end_of_day)}
+        end
     end
 
     def create   
         day = day_param
-        binding.pry
         food = Food.new(food_params)
 
         food.day = day

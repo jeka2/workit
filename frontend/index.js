@@ -20,6 +20,7 @@ const foodBar = document.querySelector('.food-searchbar');
 let searchBarResults = document.querySelector('.search-results');
 let foodResultContainer = document.querySelector('.result-container');
 let nutritionDate = document.getElementById('nutrition-date');
+let nutritionMessage = document.querySelector('.nutrition-message');
 
 const foodsOfDay = document.querySelector('.foods-of-day-container');
 let daysItemsUl = document.querySelector('.day-items');
@@ -27,6 +28,7 @@ let daysItemsUl = document.querySelector('.day-items');
 
 document.addEventListener('DOMContentLoaded', init);
 
+window.addEventListener('beforeunload', e => { return; })
 
 sectionNavs.forEach(section => {
     section.addEventListener('mouseover', blurNavbar);
@@ -188,7 +190,7 @@ class Food {
 
     buildDomInfo(container) {
         container.innerHTML = "";
-
+        console.log(this)
         let node;
         let nodeText;
 
@@ -319,16 +321,15 @@ class Food {
     }
 
     static getTodaysItems() {
-        const today = new Date();
-        const todaysDay = today.getDate();
-        const todaysMonth = today.getMonth() + 1;
-        const todaysYear = today.getFullYear();
-
-        return this.getItemsFromDay(todaysDay, todaysMonth, todaysYear);
+        return this.getItemsFromDay();
     }
 
-    static getItemsFromDay(day, month, year) {
+    static getItemsFromDay(date = new Date()) {
+        date = Utilities.getBeginningOfDay(new Date(date));
+        console.log(date)
         const url = new URL('http://localhost:3000/foods');
+        const [day, month, year] = [date.getDate(), date.getMonth() + 1, date.getFullYear()];
+        console.log(day, month, year)
         const params = {
             day: day,
             month: month,
@@ -341,19 +342,20 @@ class Food {
     static createDayInstances(items) {
         this.todaysNutrition = [];
         let newInstance;
-
         items.forEach(food => {
             newInstance = new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb, food.id);
 
             this.todaysNutrition.push(newInstance);
         });
 
-        return new Promise(res => res(this.todaysNutrition));
+        return new Promise((res, rej) => {
+            if (this.todaysNutrition.length === 0) rej(new Error('No Items For The Day Yet'))
+            else res(this.todaysNutrition)
+        });
     }
 
     static appendItemsFromDay(foods) {
         foods.slice().reverse().forEach((food, index) => { food.addToDaysStackUI(index); });
-
         return new Promise(res => res(this.todaysNutrition[this.todaysNutrition.length - 1]));
     }
 
@@ -391,12 +393,32 @@ class Food {
                 .then(items => this.createDayInstances(items.foods))
                 .then(daysFoods => this.appendItemsFromDay(daysFoods))
                 .then(lastItem => lastItem.displayInfo())
+                .catch(err => {
+                    nutritionMessage.classList.remove('hidden');
+                    nutritionMessage.innerText = err.message;
+                })
             this.setDate(new Date());
         }
     }
 
+    static populateUIOfDay(day = null) {
+        this.getItemsFromDay(day)
+            .then(items => this.createDayInstances(items.foods))
+            .then(daysFoods => this.appendItemsFromDay(daysFoods))
+            .then(lastItem => lastItem.displayInfo())
+            .catch(err => {
+                nutritionMessage.classList.remove('hidden');
+                nutritionMessage.innerText = err.message;
+            })
+    }
+
     static setDate(date) {
         nutritionDate.valueAsDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
+
+        nutritionDate.addEventListener('change', (e) => {
+            this.selectedDate = Utilities.getBeginningOfDay(e.target.value);
+            this.populateUIOfDay(this.selectedDate);
+        });
     }
 }
 
@@ -411,6 +433,11 @@ class Utilities {
             if (o[category] === object[category]) { duplicate = true; }
         })
         return duplicate;
+    }
+
+    static getBeginningOfDay(date) {
+        let timeZoneOffset = new Date().getTimezoneOffset() * 60000; // offset in milliseconds
+        return new Date(Date.parse(date) + timeZoneOffset);
     }
 }
 
