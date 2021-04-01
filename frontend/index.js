@@ -22,13 +22,14 @@ let foodResultContainer = document.querySelector('.result-container');
 let nutritionDate = document.getElementById('nutrition-date');
 let nutritionMessage = document.querySelector('.nutrition-message');
 
+let imageContainer = document.querySelector('.food-image-container');
+let nutritionInfoContainer = document.querySelector('.nutrition-info-container');
+
 const foodsOfDay = document.querySelector('.foods-of-day-container');
 let daysItemsUl = document.querySelector('.day-items');
 
 
 document.addEventListener('DOMContentLoaded', init);
-
-window.addEventListener('beforeunload', e => { return; })
 
 sectionNavs.forEach(section => {
     section.addEventListener('mouseover', blurNavbar);
@@ -176,10 +177,8 @@ class Food {
 
 
     displayInfo(e) {
-        console.log(this.constructor.todaysNutrition)
+        nutritionMessage.classList.add('hidden');
         if (e?.target.classList.contains('remove-button')) return;
-        const imageContainer = document.querySelector('.food-image-container');
-        const nutritionInfoContainer = document.querySelector('.nutrition-info-container');
         const foodImage = document.createElement('img');
         foodImage.src = this.photo;
         foodImage.alt = this.name + ' photo';
@@ -317,9 +316,10 @@ class Food {
     static selectedDate = new Date();
     static contentLoaded = false;
 
-    static updateItemsUI(data) {
-        console.log(data)
-        // reset data attributes on the elements
+    static clearUI() {
+        imageContainer.innerHTML = '';
+        nutritionInfoContainer.innerHTML = '';
+        daysItemsUl.innerHTML = '';
     }
 
     static coerceToFoodObject(food) {
@@ -340,6 +340,7 @@ class Food {
     }
 
     static createDayInstances(items) {
+        console.log(items)
         this.todaysNutrition = [];
         let newInstance;
         items.forEach(food => {
@@ -349,13 +350,16 @@ class Food {
         });
 
         return new Promise((res, rej) => {
-            if (this.todaysNutrition.length === 0) rej(new Error('No Items For The Day Yet'))
+            if (this.todaysNutrition.length === 0) {
+                this.clearUI();
+                rej(new Error('No Items For The Day Yet'));
+            }
             else res(this.todaysNutrition)
         });
     }
 
     static appendItemsFromDay(foods) {
-        daysItemsUl.innerHTML = "";
+        this.clearUI();
         foods.slice().reverse().forEach((food, index) => { food.addToDaysStackUI(index); });
         return new Promise(res => res(this.todaysNutrition[this.todaysNutrition.length - 1]));
     }
