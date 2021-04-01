@@ -303,6 +303,7 @@ i {
 }
 
 .daily-info {
+    position: relative;
     flex: 2;
 }
 
@@ -312,6 +313,7 @@ i {
 }
 
 .foods-of-day-container {
+    position: relative;
     border-radius: 4px;
     margin-top: 40px;
     height: 80%;
@@ -340,6 +342,14 @@ i {
     display: flex;
     font-size: 13px;
     justify-content: space-evenly;
+}
+
+.days-macros-total {
+    position: absolute;
+    width: 100%;
+    bottom: 40px;
+    display: flex;
+    justify-content:space-around;
 }
 
 .main-section {

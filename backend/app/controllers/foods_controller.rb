@@ -17,8 +17,8 @@ class FoodsController < ApplicationController
         food = Food.new(food_params)
 
         food.day = day
-
-        if food.save
+        binding.pry
+        if food.save    
             render json: { message: "#{food.name} has been added!", type: 'success' }
         else
             render json: { message: "Something went wrong!", type: 'error' }
@@ -70,7 +70,6 @@ private
     end
 
     def food_params
-        binding.pry
         json_params = ActionController::Parameters.new(JSON.parse(params[:data]))
         json_params.require(:foods).permit(:name, :calories, :protein, :cholesterol, :sodium, :sugar, :carbs, :fat, :serv_qty, :serv_unit, :photo, :thumb, :id)
     end

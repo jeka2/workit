@@ -21,6 +21,7 @@ let searchBarResults = document.querySelector('.search-results');
 let foodResultContainer = document.querySelector('.result-container');
 let nutritionDate = document.getElementById('nutrition-date');
 let nutritionMessage = document.querySelector('.nutrition-message');
+let daysMacros = document.querySelector('.days-macros-total');
 
 let imageContainer = document.querySelector('.food-image-container');
 let nutritionInfoContainer = document.querySelector('.nutrition-info-container');
@@ -229,7 +230,9 @@ class Food {
     removeFromNutrition() {
         const position = this.closest('.day-item').getAttribute('data-element');
         const foodToRemove = Food.todaysNutrition.splice([Food.todaysNutrition.length - position - 1], 1)[0];
-        console.log(foodToRemove)
+
+        foodToRemove.constructor.updateDaysMacros({ 'calories': foodToRemove.calories, 'protein': foodToRemove.protein, 'carbs': foodToRemove.carbs, 'fat': foodToRemove.fat }, 'decrease')
+
         foodToRemove.makePostApiRequest('DELETE');
     }
 
@@ -238,7 +241,7 @@ class Food {
         const url = new URL(`http://localhost:3000/foods/${idParam}`);
 
         const options = {};
-
+        debugger
         if (method.toLowerCase() !== 'delete') {
             options['day'] = this.constructor.selectedDate;
             options['foods'] = this;
@@ -278,6 +281,8 @@ class Food {
 
         picked = (({ calories, protein, carbs, fat }) => ({ calories, protein, carbs, fat }))(this);
 
+        this.constructor.updateDaysMacros(picked, 'increase');
+
         Object.keys(picked).forEach(function (key) {
             p = document.createElement('p');
             p.innerText = key.charAt(0).toUpperCase() + key.slice(1) + `: ${picked[key]}`;
@@ -306,24 +311,34 @@ class Food {
         daysItemsUl.appendChild(li);
     }
 
-    updateDaysItemUI() {
-
-    }
-
     static searchResults = []; // Search results from searchbar
     static currentlyViewed = null; // Currently selected item
     static todaysNutrition = [];
     static selectedDate = new Date();
     static contentLoaded = false;
+    static daysMacros = { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
     static clearUI() {
         imageContainer.innerHTML = '';
         nutritionInfoContainer.innerHTML = '';
         daysItemsUl.innerHTML = '';
+        daysMacros.innerHTML = '';
     }
 
-    static coerceToFoodObject(food) {
-        return new Food(food.name, food.calories, food.protein, food.cholesterol, food.sodium, food.sugar, food.carbs, food.fat, food.serv_qty, food.serv_unit, food.photo, food.thumb, food.id)
+    static updateDaysMacros(macros, type) {
+        daysMacros.innerHTML = "";
+        let section;
+        Object.keys(macros).forEach(key => {
+            if (type === 'increase') this.daysMacros[key] += parseInt(macros[key]);
+            else this.daysMacros[key] -= parseInt(macros[key]);
+
+            section = document.createElement('span');
+            section.classList.add(`macro-${key}`);
+
+            section.innerText = `${key}: ${this.daysMacros[key]} `;
+
+            daysMacros.appendChild(section);
+        });
     }
 
     static getItemsFromDay(date) {
